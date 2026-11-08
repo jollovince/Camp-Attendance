@@ -1,0 +1,23 @@
+{
+  "name": "camp-attendance-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test lib/validation.test.js",
+    "test:integration": "node --test integration.test.cjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
+    "@napi-rs/keyring": "^2.1.2",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

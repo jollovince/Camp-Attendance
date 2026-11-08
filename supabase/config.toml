@@ -1,0 +1,13 @@
+project_id = "camp-attendance"
+
+[auth.third_party.firebase]
+enabled = true
+project_id = "camp-attendance-d0d37"
+
+[functions.ingest-attendance]
+# Firmware sends a revocable per-device bearer token, not a Supabase user JWT.
+# The handler validates that credential through the server-only transaction RPC.
+verify_jwt = false
+
+[functions.device-enrollment]
+verify_jwt = false

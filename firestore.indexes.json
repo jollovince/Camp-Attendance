@@ -1,0 +1,1 @@
+{"indexes":[{"collectionGroup":"attendanceEvents","queryScope":"COLLECTION","fields":[{"fieldPath":"branchId","order":"ASCENDING"},{"fieldPath":"receivedAt","order":"DESCENDING"}]}],"fieldOverrides":[]}

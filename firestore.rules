@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function active() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isActive == true;
+    }
+    function allowedBranch(branchId) {
+      let profile = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return active() && (profile.role == 'owner' ||
+        (profile.role in ['admin', 'team_leader'] && branchId in profile.branchIds));
+    }
+    match /users/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+    }
+    match /employees/{id} {
+      allow read: if allowedBranch(resource.data.branchId);
+    }
+    match /attendanceEvents/{id} {
+      allow read: if allowedBranch(resource.data.branchId);
+    }
+    // devices contains credentials; only a separate sanitized projection is readable.
+    match /deviceStatuses/{id} {
+      allow read: if allowedBranch(resource.data.branchId);
+    }
+    match /branches/{id} {
+      allow read: if allowedBranch(id);
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

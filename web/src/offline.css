@@ -1,0 +1,7 @@
+.offline-workspace{max-width:1200px;margin:0 auto;padding:32px 20px;font-family:Arial,sans-serif}
+.offline-header,.offline-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.offline-workspace .panel{margin-bottom:24px}.offline-body{padding:0 23px 24px}
+.offline-actions{justify-content:flex-start}.offline-actions label{display:flex;align-items:center;gap:10px}
+.offline-actions select{padding:12px;max-width:460px}.offline-logs{white-space:pre-wrap;overflow-wrap:anywhere;background:#20292a;color:#e8eee7;padding:16px;max-height:320px;overflow:auto}
+.offline-workspace h1,.offline-workspace h2{font-family:Arial,sans-serif}
+@media(max-width:600px){.offline-actions label{display:block}.offline-actions select{max-width:100%;width:100%;margin-top:8px}}

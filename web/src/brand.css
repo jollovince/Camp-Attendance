@@ -1,0 +1,100 @@
+/* Palette visually sampled from the supplied Camp of Coffee logo.
+   Olive is approximate until an official brand color value is supplied. */
+:root {
+  --brand-olive: #596135;
+  --brand-olive-dark: #414823;
+  --brand-olive-light: #edf0e3;
+  --brand-ink: #30351f;
+  --brand-muted: #626951;
+  --brand-border: #dfe3d4;
+  --brand-paper: #f7f8f3;
+  --brand-white: #fff;
+  color: var(--brand-ink);
+  background: var(--brand-paper);
+}
+
+.sidebar, .topbar { background: var(--brand-white); border-color: var(--brand-border); }
+.brand, .topbar strong, h1, h2, h3, td strong { color: var(--brand-ink); }
+.brand { color: var(--brand-olive); }
+.brandmark, nav button.selected { background: var(--brand-olive-light); color: var(--brand-olive); }
+nav button:hover, .sidebottom > button:hover { background: #f2f4ec; }
+nav button, .sidebottom > button, .topbar, p, .navlabel,
+.eyebrow, .modebar, .modebar button, .filterhint, .filters label,
+.metrics article > span, .metrics small, .profile small,
+.person small, .muted, .panelfoot, .panelfoot button, footer,
+th, th small, td, .device dt, .device dd, .textbutton,
+.search, .search input::placeholder, .empty { color: var(--brand-muted); }
+.dot { background: var(--brand-olive); }
+.dot.amber { background: #9b6b23; }
+.sidebar-note { background: #f3f4eb; border-color: var(--brand-border); }
+.sidebar-note > svg, .sidebar-note > span, .metrics svg { color: var(--brand-olive); }
+.sidebar-note > span, .profile, .filters, .metrics article,
+.panel, .metrics, th, td, .search { border-color: var(--brand-border); }
+input, select { color: var(--brand-ink); border-color: var(--brand-border); background: var(--brand-white); }
+.outline { color: var(--brand-olive-dark); background: var(--brand-white); border-color: var(--brand-border); }
+.outline:hover { background: var(--brand-olive-light); }
+.primary { background: var(--brand-olive); color: var(--brand-white); }
+.primary:hover:not(:disabled) { background: var(--brand-olive-dark); }
+.feature, .login > section { background: var(--brand-olive); color: var(--brand-white); }
+.feature h2, .login section h1 { color: var(--brand-white); }
+.featuretag, .feature p, .feature button, .login section p { color: #f0f2e7; }
+.orbit { border-color: #ffffff20; }
+.vcard { background: var(--brand-white); color: var(--brand-olive-dark); box-shadow: 0 12px 35px #30351f40; }
+.cardlines { background: var(--brand-border); }
+.vcheck { background: var(--brand-olive-light); color: var(--brand-olive); }
+.vcard small, .vcard p { color: var(--brand-muted); }
+.badge { background: var(--brand-olive-light); color: var(--brand-olive-dark); }
+.avatar { color: var(--brand-olive); background: #f0f1e8; border-color: var(--brand-border); }
+th, .timezone { background: #f3f5ed; }
+.metrics em { color: var(--brand-muted); }
+.device > svg { color: var(--brand-olive); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline-color: var(--brand-olive);
+}
+.feature button:focus-visible, .login section a:focus-visible { outline-color: var(--brand-white); }
+
+/* Keep the supplied full logo intact, including its original white background. */
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  letter-spacing: normal;
+}
+.sidebar-logo {
+  display: block;
+  width: 172px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.brand-caption {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--brand-muted);
+  text-align: center;
+}
+.sidebar .navlabel { margin-top: 28px; }
+.sidebar-note { margin-top: 28px; }
+.login-logo {
+  display: block;
+  width: 210px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 28px;
+}
+.mini-brand { justify-content: center; }
+.card-logo { display: block; width: 90px; height: auto; object-fit: contain; }
+@media (max-width: 760px) {
+  .login-logo { width: 145px; margin-bottom: 20px; }
+  .card-logo { width: 70px; }
+}
+@media (max-height: 820px) {
+  .sidebar { overflow-y: auto; }
+  .sidebar-logo { width: 140px; }
+  .sidebar .navlabel { margin-top: 20px; }
+  .sidebar-note { margin-top: 20px; }
+}

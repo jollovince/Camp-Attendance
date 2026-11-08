@@ -1,0 +1,30 @@
+import {useEffect,useState} from 'react';
+import {supabase} from './supabase';
+type Job={id:string;status:string;step:string;error_code:string|null;expires_at:string;rfid_uid:string|null;fingerprint_template_id:number|null};
+const instructions:Record<string,string>={waiting_for_device:'Waiting for ESP32. Keep both boards powered and the ESP32 connected to Wi-Fi.',tap_card:'Tap the employee’s NEW RFID card on the reader.',place_finger:'Place the employee’s finger on the fingerprint sensor.',remove_finger:'Lift the finger completely off the sensor.',place_again:'Place the SAME finger on the sensor again.',saving:'Saving the fingerprint and card mapping. Keep both boards powered.',completed:'Enrollment completed. This employee can now submit attendance.',expired:'Enrollment timed out. Check the device, then start again.'};
+const failures:Record<string,string>={CARD_ALREADY_REGISTERED:'This RFID card is already registered. Use another card.',FINGER_ALREADY_REGISTERED:'This fingerprint already exists in the sensor. Use a different finger; existing templates have been preserved.',NO_SAFE_SENSOR_SLOT:'Cannot safely identify a free sensor slot. Check the sensor connection and its index-table support.',MAPPING_CONFLICT:'Hardware data conflicts with an existing employee. Keep the device powered and ask the administrator to reconcile the mapping.',CARD_TIMEOUT:'No card was scanned within 45 seconds.',FIRST_CAPTURE_FAILED:'The first fingerprint scan failed or timed out. Clean the sensor and try again.',SECOND_CAPTURE_FAILED:'The second scan failed or timed out. Try again.',FINGERPRINT_MISMATCH:'The two scans did not match. Use the same finger for both scans.',TIMEOUT:'The enrollment request expired.'};
+instructions.waiting_for_mega='ESP32 received the request. Waiting for the Mega to acknowledge enrollment. Check both boards and the UART wiring.';
+failures.MEGA_NOT_RESPONDING='The Mega did not acknowledge enrollment within 30 seconds. Upload the enrollment firmware to both boards and check ESP32 TX17 to Mega RX19, Mega TX18 through a level shifter to ESP32 RX16, and common GND. If the reader is still capturing, wait for SYSTEM READY before retrying.';
+export function EmployeeEnrollment({employeeId,name,onCompleted,onClose}:{employeeId:string;name:string;onCompleted:()=>void;onClose:()=>void}){
+ const [job,setJob]=useState<Job|null>(null),[busy,setBusy]=useState(false),[cancelling,setCancelling]=useState(false),[error,setError]=useState('');
+ useEffect(()=>{let active=true,completed='';setJob(null);setError('');
+  async function refresh(){if(!supabase)return;const {data,error}=await supabase.from('enrollment_jobs').select('id,status,step,error_code,expires_at,rfid_uid,fingerprint_template_id').eq('employee_id',employeeId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(!active)return;if(error){setError('Cannot refresh enrollment status. Check your connection.');return}setError('');setJob(data);if(data?.status==='completed'&&completed!==data.id){completed=data.id;onCompleted()}}
+  let timer:number|undefined;
+  async function poll(){try{await refresh()}finally{if(active)timer=window.setTimeout(()=>void poll(),1000)}}
+  void poll();return()=>{active=false;window.clearTimeout(timer)};
+ },[employeeId]);
+ const expired=job&&['queued','running'].includes(job.status)&&new Date(job.expires_at).getTime()<Date.now();
+ const running=job&&['queued','running'].includes(job.status)&&!expired;
+ async function start(){if(!supabase)return;setBusy(true);setError('');try{const {data,error}=await supabase.rpc('start_employee_enrollment',{p_employee_id:employeeId});if(error)throw error;setJob(data)}catch(e){setError((e as {message?:string}).message??'Unable to start enrollment.')}finally{setBusy(false)}}
+ async function cancel(){if(!supabase||!job||cancelling)return;setCancelling(true);setError('');try{const {data,error}=await supabase.rpc('cancel_employee_enrollment',{p_job_id:job.id});if(error)throw error;setJob(data);if(data?.status==='completed')onCompleted()}catch(e){setError((e as {message?:string}).message??'Unable to cancel enrollment. Please retry.')}finally{setCancelling(false)}}
+ return <section className="panel enrollment-panel" aria-live="polite"><div className="panelhead"><div><h2>Enroll hardware · {name}</h2><p>Have the employee, a new RFID card, and the powered terminal ready.</p></div><button className="outline" onClick={onClose}>Close</button></div><div className="enrollment-body">
+ <ol><li>Tap RFID card</li><li>Scan finger</li><li>Lift, then scan again</li><li>Wait for cloud confirmation</li></ol>
+ {job&&<p className="enrollment-instruction">{job.error_code==='CANCELLED'?'Enrollment cancelled. The employee remains pending enrollment.':expired?instructions.expired:job.status==='failed'?(failures[job.error_code??'']??`Enrollment failed: ${job.error_code??'hardware error'}. Check the device and retry.`):instructions[job.step]??'Waiting for hardware progress…'}</p>}
+ {job?.status==='completed'&&<p>RFID: <code>{job.rfid_uid}</code> · Fingerprint ID: <strong>{job.fingerprint_template_id}</strong></p>}
+ {error&&<div className="error" role="alert">{error}</div>}
+ {job?.status!=='completed'&&<button className="primary" onClick={start} disabled={busy||cancelling||!!running}>{busy?'Starting…':running?'Enrollment in progress…':'Start RFID & fingerprint enrollment'}</button>}
+ {job&&['queued','running'].includes(job.status)&&<button className="outline" onClick={cancel} disabled={busy||cancelling}>{cancelling?'Cancelling…':'Cancel enrollment'}</button>}
+ {job?.error_code==='CANCELLED'&&<p className="enrollment-note">If the reader is still capturing, wait for it to return to SYSTEM READY before starting again. Cancellation does not erase fingerprints or card mappings already saved on the hardware.</p>}
+ <p className="enrollment-note">Requires the enrollment firmware on BOTH Mega and ESP32, including ESP32 TX17 → Mega RX19. Closing this panel does not cancel a running request. Requests expire after 15 minutes.</p>
+ </div></section>;
+}
